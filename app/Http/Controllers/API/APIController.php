@@ -21,7 +21,7 @@ class APIController extends Controller
             $user->password = bcrypt($data["password"]);
             $user->save();
 
-            return response()->json(['status'=>true,'message'=>'Kullanıcı başarılı tebrikler'],201);
+            return response()->json(['status'=>true,'message'=>'Tebrikler kayıt başarılı'],201);
         }
     }
 }
