@@ -21,7 +21,6 @@ class APIController extends Controller
                 "email" => "required|email|unique:users",
                 "password" => "required"
             ];
-
             $customMessages = [
                 "name.required" => "Bu alan zorunlu",
                 "email.required" => "Bu alan zorunlu",
@@ -40,7 +39,38 @@ class APIController extends Controller
             $user->password = bcrypt($data["password"]);
             $user->save();
 
-            return response()->json(['status'=>true,'message'=>'Tebrikler kayıt başarılı'],201);
+            $messages = "Tebrikler kayıt başarılı";
+            return response()->json(['status'=>true,'message'=>$messages],201);
+        }
+    }
+
+    //http://127.0.0.1:8000/api/login-user
+    public function loginUser(Request $request)
+    {
+        if($request->isMethod('post'))
+        {
+            $data = $request->input();
+
+            $userCount = User::where('email',$data['email'])->count();
+            if($userCount)
+            {
+                $userDetails = User::where('email',$data['email'])->first();
+                if(password_verify($data['password'],$userDetails->password))
+                {
+                    $messages = "Giriş işlemi başarılı";
+                    return response()->json(['status'=>true,'message'=>$messages],201);
+                }
+                else
+                {
+                    $messages = "Şifreniz yanlış lütfen kontrol ediniz.";
+                    return response()->json(['status'=>false,'message'=>$messages],422);
+                }
+            }
+            else
+            {
+                $messages = "Bu email bulunamadı lütfen kontrol ediniz.";
+                return response()->json(['status'=>false,'message'=>$messages],422);
+            }
         }
     }
 }
