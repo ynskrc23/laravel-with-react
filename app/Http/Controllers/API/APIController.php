@@ -22,15 +22,15 @@ class APIController extends Controller
                 "password" => "required"
             ];
             $customMessages = [
-                "name.required" => "Bu alan zorunlu",
-                "email.required" => "Bu alan zorunlu",
-                "email.unique" => "Bu mail zaten kayıtlı",
-                "password.required" => "Bu alan zorunlu",
+                "name.required" => "Name is required",
+                "email.required" => "Email is required",
+                "email.unique" => "Email already exists",
+                "password.required" => "Password is required",
             ];
 
             $validator = Validator::make($data,$rules,$customMessages);
             if($validator->fails()){
-                return response()->json([$validator->errors()],422);
+                return response()->json($validator->errors(),422);
             }
 
             $user = new User();
@@ -39,7 +39,7 @@ class APIController extends Controller
             $user->password = bcrypt($data["password"]);
             $user->save();
 
-            $messages = "Tebrikler kayıt başarılı";
+            $messages = "Congratulations, the registration was successful.";
             return response()->json(['status'=>true,'message'=>$messages],201);
         }
     }
@@ -51,24 +51,39 @@ class APIController extends Controller
         {
             $data = $request->input();
 
+            $rules = [
+                "email" => "required|email|exists:users",
+                "password" => "required"
+            ];
+            $customMessages = [
+                "email.required" => "Email is required",
+                "email.exists" => "Email does not exists",
+                "password.required" => "Password is required"
+            ];
+
+            $validator = Validator::make($data,$rules,$customMessages);
+            if($validator->fails()){
+                return response()->json($validator->errors(),422);
+            }
+
             $userCount = User::where('email',$data['email'])->count();
             if($userCount)
             {
                 $userDetails = User::where('email',$data['email'])->first();
                 if(password_verify($data['password'],$userDetails->password))
                 {
-                    $messages = "Giriş işlemi başarılı";
+                    $messages = "User Login Successfully!";
                     return response()->json(['status'=>true,'message'=>$messages],201);
                 }
                 else
                 {
-                    $messages = "Şifreniz yanlış lütfen kontrol ediniz.";
+                    $messages = "Password is Incorrect!";
                     return response()->json(['status'=>false,'message'=>$messages],422);
                 }
             }
             else
             {
-                $messages = "Bu email bulunamadı lütfen kontrol ediniz.";
+                $messages = "Email is Incorrect!";
                 return response()->json(['status'=>false,'message'=>$messages],422);
             }
         }
