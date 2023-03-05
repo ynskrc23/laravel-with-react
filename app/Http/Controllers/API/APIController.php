@@ -73,7 +73,11 @@ class APIController extends Controller
                 if(password_verify($data['password'],$userDetails->password))
                 {
                     $messages = "User Login Successfully!";
-                    return response()->json(['status'=>true,'message'=>$messages],201);
+                    return response()->json([
+                        'userDetails'=>$userDetails,
+                        'status'=>true,
+                        'message'=>$messages
+                    ],201);
                 }
                 else
                 {
@@ -84,6 +88,49 @@ class APIController extends Controller
             else
             {
                 $messages = "Email is Incorrect!";
+                return response()->json(['status'=>false,'message'=>$messages],422);
+            }
+        }
+    }
+
+    public function updateUser(Request $request)
+    {
+        if($request->isMethod('post')){
+            $data = $request->input();
+
+            $rules = [
+                "name" => "required"
+            ];
+            $customMessages = [
+                "name.required" => "Name is required"
+            ];
+
+            $validator = Validator::make($data,$rules,$customMessages);
+            if($validator->fails()){
+                return response()->json($validator->errors(),422);
+            }
+
+            $userCount = User::where('id',$data['id'])->count();
+            if($userCount)
+            {
+                User::where('id',$data['id'])->update([
+                    'name' => $data['name'],
+                    'city'=> $data['city'],
+                    'state'=> $data['state'],
+                    'country'=> $data['country'],
+                    'pincode'=> $data['pincode']
+                ]);
+                $userDetails = User::where('id',$data['id'])->first();
+                $messages = "User Update Successfully!";
+                return response()->json([
+                    'userDetails'=>$userDetails,
+                    'status'=>true,
+                    'message'=>$messages
+                ],201);
+            }
+            else
+            {
+                $messages = "User does not exists!";
                 return response()->json(['status'=>false,'message'=>$messages],422);
             }
         }

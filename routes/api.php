@@ -24,4 +24,5 @@ Route::get("user/{id}","App\Http\Controllers\APIController@getByUserId");
 Route::namespace('App\Http\Controllers\API')->group(function (){
     Route::post('register-user','APIController@registerUser');
     Route::post('login-user','APIController@loginUser');
+    Route::post('update-user','APIController@updateUser');
 });
